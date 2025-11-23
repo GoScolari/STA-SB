@@ -2,10 +2,12 @@
  
 "## Proyecto de Tï¿½tulo - Ingenierï¿½a en Informï¿½tica" 
 "### Estudiantes: Gonzalo Scolari, Xavier Barrera" 
-"### Tutor: Dragust¡n Fern ndez" 
+"### Tutor: Dragustï¿½n Fernï¿½ndez" 
 "### Cliente: OUA San Javier" 
 "### Empresa: CEA Project SPA" 
  
-"## EV3: Implementaci¢n y Pruebas" 
+"## EV3: Implementaciï¿½n y Pruebas" 
  
-"Sistema integral de telemetr¡a para automatizaci¢n de canales de riego." 
+"Sistema integral de telemetrÃ­a para automatizaciÃ³n de canales de riego." 
+
+...
