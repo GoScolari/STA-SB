@@ -13,6 +13,8 @@ const path = require('path');
 const logger = require('./config/logger');
 const db = require('./config/database');
 const influx = require('./config/influx');
+const mqtt = require('./config/mqtt');
+const websocket = require('./config/websocket');
 const routes = require('./routes');
 const { apiLimiter } = require('./middleware/rateLimit');
 const { sanitizeData } = require('./middleware/validator');
@@ -143,16 +145,41 @@ const startServer = async () => {
       logger.warn('No se pudo conectar a InfluxDB - Continuando sin series temporales');
     }
 
-    // Iniciar servidor
-    app.listen(PORT, HOST, () => {
+    // Iniciar servidor HTTP
+    const server = app.listen(PORT, HOST, async () => {
       logger.info('='.repeat(60));
       logger.info('🚀 Servidor STA-SB iniciado correctamente');
       logger.info(`📍 URL: http://${HOST}:${PORT}`);
       logger.info(`🌍 Entorno: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`📊 PostgreSQL: ✅ Conectado`);
       logger.info(`📈 InfluxDB: ${influxConnected ? '✅' : '⚠️'} ${influxConnected ? 'Conectado' : 'No disponible'}`);
+
+      // Inicializar WebSocket
+      try {
+        websocket.inicializar(server);
+        logger.info(`🔌 WebSocket: ✅ Inicializado en ws://${HOST}:${PORT}/ws`);
+
+        // Conectar a broker MQTT
+        try {
+          await mqtt.conectar();
+          // Pasar el módulo websocket completo (no solo el servidor io)
+          mqtt.registrarWebSocket(websocket);
+          logger.info('📡 MQTT: ✅ Conectado y listo para recibir datos');
+        } catch (mqttError) {
+          logger.warn('⚠️  MQTT: No disponible -', mqttError.message);
+          logger.warn('   El sistema funcionará sin datos en tiempo real desde estaciones');
+        }
+
+      } catch (wsError) {
+        logger.error('❌ Error inicializando WebSocket:', wsError.message);
+      }
+
+      logger.info('='.repeat(60));
+      logger.info('📚 Documentación Swagger: http://' + HOST + ':' + PORT + '/api-docs');
       logger.info('='.repeat(60));
     });
+
+    return server;
 
   } catch (error) {
     logger.error('Error fatal al iniciar servidor:', error.message);
@@ -168,6 +195,10 @@ const gracefulShutdown = async (signal) => {
   logger.info(`\n📴 Señal ${signal} recibida. Cerrando servidor...`);
 
   try {
+    // Cerrar conexiones MQTT y WebSocket
+    await mqtt.desconectar();
+    websocket.cerrar();
+
     // Cerrar conexiones de base de datos
     await db.closePool();
     await influx.close();

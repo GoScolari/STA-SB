@@ -208,6 +208,16 @@ const getPermisos = (rol) => {
   return PERMISOS_POR_ROL[rol] || [];
 };
 
+/**
+ * Verifica y decodifica un token JWT (usado por WebSocket)
+ * @param {string} token - Token JWT a verificar
+ * @returns {Object} - Datos decodificados del token
+ * @throws {Error} - Si el token es inválido
+ */
+const verifyToken = (token) => {
+  return jwt.verify(token, process.env.JWT_SECRET);
+};
+
 module.exports = {
   authenticateToken,
   requireRole,
@@ -216,6 +226,7 @@ module.exports = {
   requireOperador,
   tienePermiso,
   getPermisos,
+  verifyToken,
   ROLES,
   PERMISOS,
   PERMISOS_POR_ROL

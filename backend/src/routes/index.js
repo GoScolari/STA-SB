@@ -9,6 +9,7 @@ const router = express.Router();
 // Importar rutas
 const authRoutes = require('./auth');
 const estacionesRoutes = require('./estaciones');
+const sensoresRoutes = require('./sensores');
 
 /**
  * @route   GET /api
@@ -86,5 +87,6 @@ router.get('/health', (req, res) => {
 // Registrar rutas
 router.use('/auth', authRoutes);
 router.use('/estaciones', estacionesRoutes);
+router.use('/sensores', sensoresRoutes);
 
 module.exports = router;
